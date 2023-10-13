@@ -5,17 +5,23 @@ export const config = {
     bodyParser: false,
   },
 };
-
+//https://www.youtube.com/watch?v=QTD9L0jL0dU&t=14s reference
 export async function POST(request) {
   try {
     // Access the audio data from request.body
-    const audioBlob = await request.blob();
-    const audioArrayBuffer = await audioBlob.arrayBuffer();
-    const audioBuffer = Buffer.from(audioArrayBuffer);
+const formData = await request.formData();
+const file = formData.get('audio');
+    
+
+
+    // Convert File to Buffer
+    const arrayBuffer = await file.arrayBuffer();
+    const buffer = Buffer.from(arrayBuffer);
 
     // Save the audio data to a file in the root directory
     const filePath = path.join(process.cwd(), 'audio.wav');
-    await fs.promises.writeFile(filePath, audioBuffer);
+    await fs.promises.writeFile(filePath, buffer);
+
 
     return new Response(JSON.stringify({ message: 'Audio data received and saved' }), { status: 200 });
   } catch (error) {
