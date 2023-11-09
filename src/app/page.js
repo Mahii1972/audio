@@ -8,7 +8,10 @@ const IndexPage = () => {
   const streamRef = useRef(null);
   const mediaRecorderRef = useRef(null);
   const localAudioChunksRef = useRef([]);
-  const [wavBlob, setWavBlob] = useState(null); 
+  const [wavBlob, setWavBlob] = useState(null);
+  const [serverMessage, setServerMessage] = useState(null);
+
+
 
   const getMicrophonePermission = async () => {
     try {
@@ -29,7 +32,8 @@ const IndexPage = () => {
   
   const startRecording = async () => {
     setIsRecording(true);
-    if (!streamRef.current) {
+    setServerMessage(null);
+        if (!streamRef.current) {
       await getMicrophonePermission();
     }
 
@@ -60,13 +64,14 @@ const IndexPage = () => {
   
       const data = await response.json();
       console.log(data);
+      setServerMessage(data.message);
     } catch (error) {
       console.error('Error sending audio to server:', error);
     }
   };
   const stopRecording = async () => {
     setIsRecording(false);
-    mediaRecorderRef.current.stop();
+        mediaRecorderRef.current.stop();
     mediaRecorderRef.current.onstop = async () => {
       const audioBlob = new Blob(localAudioChunksRef.current, { type: "audio/webm" });
       const audioBuffer = await blobToAudioBuffer(audioBlob);
@@ -79,17 +84,26 @@ const IndexPage = () => {
 
   return (
     <div className="flex flex-col items-center">
-      <button className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg mt-4" onClick={startRecording}>Start Recording</button>
-      <button className="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded-lg mt-2" onClick={stopRecording}>Stop Recording</button>
+      {!isRecording && (
+        <button className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg mt-4 transition duration-500 ease-in-out transform hover:-translate-y-1 hover:scale-110" onClick={startRecording}>Start Recording</button>
+        )}
       {isRecording && (
-        <img className="mt-4" src="https://i.gifer.com/YdBO.gif" alt="Recording" />
+        <>
+          <button className="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded-lg mt-2 transition duration-500 ease-in-out transform hover:-translate-y-1 hover:scale-110" onClick={stopRecording}>Stop Recording</button>
+          <img className="mt-4" src="https://i.gifer.com/YdBO.gif" alt="Recording" />
+        </>
       )}
-    {audioURL && (
+      {!isRecording && audioURL && (
         <>
           <audio className="mt-4" src={audioURL} controls />
-          <button className="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-lg mt-2" onClick={downloadWavFile}>Download WAV</button>
-          <button className="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-lg mt-2" onClick={apiServer}>Authenticate</button>
+          <button className="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-lg mt-2 transition duration-500 ease-in-out transform hover:-translate-y-1 hover:scale-110" onClick={downloadWavFile}>Download WAV</button>
+          <button className="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-lg mt-2 transition duration-500 ease-in-out transform hover:-translate-y-1 hover:scale-110" onClick={apiServer}>Authenticate</button>
         </>
+      )}
+      {!isRecording && serverMessage && (
+        <div className="mt-4">
+          <h2 className="text-lg font-semibold">{serverMessage}</h2>
+        </div>
       )}
     </div>
   );

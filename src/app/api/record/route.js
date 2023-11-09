@@ -1,11 +1,6 @@
 import fs from 'fs';
 import path from 'path';
-export const config = {
-  api: {
-    bodyParser: false,
-  },
-};
-//https://www.youtube.com/watch?v=QTD9L0jL0dU&t=14s reference
+
 export async function POST(request) {
   try {
     // Access the audio data from request.body
